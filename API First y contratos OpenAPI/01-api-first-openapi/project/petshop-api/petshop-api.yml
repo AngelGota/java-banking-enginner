@@ -1,0 +1,491 @@
+openapi: 3.0.3
+
+info:
+  title: Happy Paws PetShop API
+  description: |
+    API REST para la gestión del catálogo
+    de productos de una tienda de mascotas.
+
+    Proyecto educativo - Java Backend Academy.
+  version: 1.0.0
+  contact:
+    name: Angelo Gomez
+    email: gangelos630@gmail.com
+
+servers:
+  - url: /petshop-v1
+    description: Entorno local
+
+tags:
+  - name: Products
+    description: Gestión de productos
+
+paths:
+  # ==========================================
+  # OPERATION 01 - LIST PRODUCTS
+  # GET /products
+  # ==========================================
+
+  /products:
+    get:
+      tags:
+        - Products
+      summary: Listar productos
+      description: |
+        Permite consultar el catálogo de productos
+        mediante paginación.
+      operationId: listProducts
+      parameters:
+        - name: page
+          in: query
+          description: Número de página desde cero
+          required: false
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+
+        - name: size
+          in: query
+          description: Cantidad de productos por página
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+
+      responses:
+        "200":
+          description: Listado de productos
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductPage"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+    # ==========================================
+    # OPERATION 02 - CREATE PRODUCT
+    # POST /products
+    # ==========================================
+
+    post:
+      tags:
+        - Products
+      summary: Registrar un producto
+      description: |
+        Permite registrar un nuevo producto
+        en el catálogo de la tienda.
+      operationId: createProduct
+      requestBody:
+        required: true
+        description: Información del producto
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+
+      responses:
+        "201":
+          description: Producto creado correctamente
+          headers:
+            Location:
+              description: URI del producto creado
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ==========================================
+  # OPERATIONS BY PRODUCT ID
+  # ==========================================
+
+  /products/{productId}:
+    # ==========================================
+    # OPERATION 03 - GET PRODUCT BY ID
+    # GET /products/{productId}
+    # ==========================================
+
+    get:
+      tags:
+        - Products
+      summary: Consultar un producto
+      description: |
+        Permite consultar la información
+        de un producto mediante su identificador.
+      operationId: getProductById
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+
+      responses:
+        "200":
+          description: Producto encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+    # ==========================================
+    # OPERATION 04 - UPDATE PRODUCT
+    # PATCH /products/{productId}
+    # ==========================================
+
+    patch:
+      tags:
+        - Products
+      summary: Actualizar parcialmente un producto
+      description: |
+        Permite modificar uno o varios atributos
+        de un producto existente.
+      operationId: updateProduct
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+
+      requestBody:
+        required: true
+        description: Campos que se desean actualizar
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+
+      responses:
+        "200":
+          description: Producto actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+    # ==========================================
+    # OPERATION 05 - DELETE PRODUCT
+    # DELETE /products/{productId}
+    # ==========================================
+
+    delete:
+      tags:
+        - Products
+      summary: Eliminar un producto
+      description: |
+        Permite eliminar un producto
+        del catálogo de la tienda.
+      operationId: deleteProduct
+      parameters:
+        - $ref: "#/components/parameters/ProductId"
+
+      responses:
+        "204":
+          description: Producto eliminado correctamente
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+# ==========================================
+# REUSABLE COMPONENTS
+# ==========================================
+
+components:
+  # ==========================================
+  # PARAMETERS
+  # ==========================================
+
+  parameters:
+    ProductId:
+      name: productId
+      in: path
+      required: true
+      description: Identificador único del producto
+      schema:
+        type: string
+        format: uuid
+      example: 550e8400-e29b-41d4-a716-446655440000
+
+  # ==========================================
+  # SCHEMAS
+  # ==========================================
+
+  schemas:
+    # ----------------------------------------
+    # PRODUCT
+    # ----------------------------------------
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - stock
+        - category
+
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Identificador único del producto
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+          description: Nombre del producto
+          example: Alimento Premium para Perros
+
+        description:
+          type: string
+          maxLength: 500
+          description: Descripción del producto
+          example: Bolsa de alimento de 3 kg
+
+        price:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          description: Precio del producto en PEN
+          example: 89.90
+
+        stock:
+          type: integer
+          minimum: 0
+          description: Cantidad disponible
+          example: 25
+
+        category:
+          $ref: "#/components/schemas/ProductCategory"
+
+    # ----------------------------------------
+    # PRODUCT CATEGORY
+    # ----------------------------------------
+
+    ProductCategory:
+      type: string
+      description: Categoría del producto
+      enum:
+        - FOOD
+        - TOYS
+        - ACCESSORIES
+        - HYGIENE
+      example: FOOD
+
+    # ----------------------------------------
+    # CREATE PRODUCT REQUEST
+    # ----------------------------------------
+
+    CreateProductRequest:
+      type: object
+      additionalProperties: false
+
+      required:
+        - name
+        - price
+        - stock
+        - category
+
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+          example: Alimento Premium para Perros
+
+        description:
+          type: string
+          maxLength: 500
+          example: Bolsa de alimento de 3 kg
+
+        price:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          example: 89.90
+
+        stock:
+          type: integer
+          minimum: 0
+          example: 25
+
+        category:
+          $ref: "#/components/schemas/ProductCategory"
+
+    # ----------------------------------------
+    # UPDATE PRODUCT REQUEST
+    # ----------------------------------------
+
+    UpdateProductRequest:
+      type: object
+      minProperties: 1
+      additionalProperties: false
+
+      properties:
+        name:
+          type: string
+          minLength: 3
+          maxLength: 120
+          example: Alimento Premium para Gatos
+
+        description:
+          type: string
+          maxLength: 500
+          example: Bolsa de alimento de 5 kg
+
+        price:
+          type: number
+          format: double
+          minimum: 0
+          multipleOf: 0.01
+          example: 99.90
+
+        stock:
+          type: integer
+          minimum: 0
+          example: 30
+
+        category:
+          $ref: "#/components/schemas/ProductCategory"
+
+    # ----------------------------------------
+    # PRODUCT PAGE
+    # ----------------------------------------
+
+    ProductPage:
+      type: object
+
+      required:
+        - content
+        - page
+        - size
+        - totalElements
+
+      properties:
+        content:
+          type: array
+          description: Lista de productos
+          items:
+            $ref: "#/components/schemas/Product"
+
+        page:
+          type: integer
+          minimum: 0
+          description: Página actual
+          example: 0
+
+        size:
+          type: integer
+          minimum: 1
+          description: Tamaño de página
+          example: 20
+
+        totalElements:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Total de productos
+          example: 150
+
+    # ----------------------------------------
+    # API ERROR
+    # ----------------------------------------
+
+    ApiError:
+      type: object
+
+      required:
+        - code
+        - message
+
+      properties:
+        code:
+          type: string
+          description: Código de error
+          example: PRODUCT_NOT_FOUND
+
+        message:
+          type: string
+          description: Descripción del error
+          example: El producto solicitado no existe
+
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora del error
+          example: "2026-11-11T15:30:00Z"
+
+        path:
+          type: string
+          description: Ruta que produjo el error
+          example: /petshop-v1/products/123
+
+  # ==========================================
+  # REUSABLE RESPONSES
+  # ==========================================
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          example:
+            code: INVALID_REQUEST
+            message: Los datos enviados no son válidos
+            timestamp: "2026-11-11T15:30:00Z"
+            path: /petshop-v1/products
+
+    NotFound:
+      description: Recurso no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          example:
+            code: PRODUCT_NOT_FOUND
+            message: El producto solicitado no existe
+            timestamp: "2026-11-11T15:30:00Z"
+            path: /petshop-v1/products/123
+
+    Conflict:
+      description: Conflicto con el estado del recurso
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+          example:
+            code: PRODUCT_CONFLICT
+            message: La operación genera un conflicto
+            timestamp: "2026-11-11T15:30:00Z"
+            path: /petshop-v1/products

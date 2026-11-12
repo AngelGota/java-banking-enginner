@@ -1,0 +1,593 @@
+openapi: 3.0.3
+
+info:
+  title: Banking Customer Profile API
+  description: |
+    API bancaria educativa alineada conceptualmente
+    con BIAN (Banking Industry Architecture Network).
+
+    Service Domain: Customer Profile
+
+    Control Record: CustomerProfileRecord
+
+    Behavior Qualifier: ContactPreferences
+
+    Este contrato es didáctico y no representa
+    una especificación oficial certificada por BIAN.
+
+    Proyecto: Java Backend Engineering Academy.
+  version: 1.1.1
+  contact:
+    name: Angelo Gomez
+    email: gangelos630@gmail.com
+
+servers:
+  - url: /banking-v1
+    description: Entorno local
+
+tags:
+  - name: CR - CustomerProfileRecord
+    description: Gestión del ciclo de vida del perfil
+  - name: BQ - ContactPreferences
+    description: Preferencias de contacto del cliente
+
+paths:
+  # ==========================================
+  # OPERATION 01 - INITIATE
+  # ==========================================
+
+  /CustomerProfile/Initiate:
+    post:
+      tags:
+        - CR - CustomerProfileRecord
+      summary: Iniciar un perfil bancario
+      description: |
+        Initiate - Crea una instancia del
+        Control Record CustomerProfileRecord.
+      operationId: InitiateCustomerProfile
+      security:
+        - bearerAuth: []
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InitiateCustomerProfileRequest"
+
+      responses:
+        "201":
+          description: Perfil iniciado correctamente
+          headers:
+            Location:
+              description: URI de consulta del perfil
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerProfileRecord"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ==========================================
+  # OPERATION 02 - RETRIEVE
+  # ==========================================
+
+  /CustomerProfile/{customerprofileid}/Retrieve:
+    get:
+      tags:
+        - CR - CustomerProfileRecord
+      summary: Recuperar un perfil bancario
+      description: |
+        Retrieve - Consulta el estado y los
+        datos de un Control Record existente.
+      operationId: RetrieveCustomerProfile
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/CustomerProfileId"
+
+      responses:
+        "200":
+          description: Perfil encontrado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerProfileRecord"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  # ==========================================
+  # OPERATION 03 - UPDATE
+  # ==========================================
+
+  /CustomerProfile/{customerprofileid}/Update:
+    put:
+      tags:
+        - CR - CustomerProfileRecord
+      summary: Actualizar un perfil bancario
+      description: |
+        Update - Modifica datos administrados
+        por el Control Record.
+
+        En este ejercicio se permite actualizar
+        nombre, correo y teléfono.
+      operationId: UpdateCustomerProfile
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/CustomerProfileId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateCustomerProfileRequest"
+
+      responses:
+        "200":
+          description: Perfil actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerProfileRecord"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ==========================================
+  # OPERATION 04 - EXECUTE
+  # ==========================================
+
+  /CustomerProfile/{customerprofileid}/Execute:
+    post:
+      tags:
+        - CR - CustomerProfileRecord
+      summary: Ejecutar verificación del perfil
+      description: |
+        Execute - Solicita una verificación
+        automatizada del perfil bancario.
+
+        La verificación es simulada y no
+        representa un proceso KYC real.
+      operationId: ExecuteCustomerProfileVerification
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/CustomerProfileId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ExecuteVerificationRequest"
+
+      responses:
+        "200":
+          description: Verificación ejecutada
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerificationResult"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ==========================================
+  # OPERATION 05 - CONTROL
+  # ==========================================
+
+  /CustomerProfile/{customerprofileid}/Control:
+    put:
+      tags:
+        - CR - CustomerProfileRecord
+      summary: Controlar el estado del perfil
+      description: |
+        Control - Solicita una transición
+        del estado operativo del perfil.
+
+        Acciones educativas:
+        SUSPEND y REACTIVATE.
+      operationId: ControlCustomerProfile
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/CustomerProfileId"
+
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ControlCustomerProfileRequest"
+
+      responses:
+        "200":
+          description: Estado actualizado
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerProfileRecord"
+
+        "400":
+          $ref: "#/components/responses/BadRequest"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+        "409":
+          $ref: "#/components/responses/Conflict"
+
+  # ==========================================
+  # BEHAVIOR QUALIFIER - CONTACT PREFERENCES
+  # ==========================================
+
+  /CustomerProfile/{customerprofileid}/ContactPreferences/Retrieve:
+    get:
+      tags:
+        - BQ - ContactPreferences
+      summary: Consultar preferencias de contacto
+      description: |
+        Retrieve BQ - Recupera las preferencias
+        de comunicación asociadas al perfil.
+      operationId: RetrieveContactPreferences
+      security:
+        - bearerAuth: []
+
+      parameters:
+        - $ref: "#/components/parameters/CustomerProfileId"
+
+      responses:
+        "200":
+          description: Preferencias encontradas
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactPreferences"
+
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+# ==========================================
+# COMPONENTS
+# ==========================================
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    CustomerProfileId:
+      name: customerprofileid
+      in: path
+      required: true
+      description: Identificador del Control Record
+      schema:
+        type: string
+        format: uuid
+
+  schemas:
+    # ========================================
+    # CONTROL RECORD
+    # ========================================
+
+    CustomerProfileRecord:
+      type: object
+      additionalProperties: false
+
+      required:
+        - customerProfileId
+        - customerReference
+        - fullName
+        - status
+        - verificationStatus
+
+      properties:
+        customerProfileId:
+          type: string
+          format: uuid
+          example: 550e8400-e29b-41d4-a716-446655440000
+
+        customerReference:
+          type: string
+          description: Referencia al cliente bancario
+          example: CUS-000125
+
+        fullName:
+          type: string
+          example: Carlos Ramirez
+
+        email:
+          type: string
+          format: email
+          example: carlos@example.com
+
+        phoneNumber:
+          type: string
+          example: "+51987654321"
+
+        status:
+          $ref: "#/components/schemas/ProfileStatus"
+
+        verificationStatus:
+          $ref: "#/components/schemas/VerificationStatus"
+
+        contactPreferences:
+          $ref: "#/components/schemas/ContactPreferences"
+
+    ProfileStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - SUSPENDED
+
+    VerificationStatus:
+      type: string
+      enum:
+        - PENDING
+        - VERIFIED
+        - REJECTED
+
+    # ========================================
+    # INITIATE REQUEST
+    # ========================================
+
+    InitiateCustomerProfileRequest:
+      type: object
+      additionalProperties: false
+
+      required:
+        - customerReference
+        - fullName
+
+      properties:
+        customerReference:
+          type: string
+          minLength: 1
+          maxLength: 50
+          example: CUS-000125
+
+        fullName:
+          type: string
+          minLength: 3
+          maxLength: 150
+          example: Carlos Ramirez
+
+        email:
+          type: string
+          format: email
+          example: carlos@example.com
+
+        phoneNumber:
+          type: string
+          example: "+51987654321"
+
+    # ========================================
+    # UPDATE REQUEST
+    # ========================================
+
+    UpdateCustomerProfileRequest:
+      type: object
+      additionalProperties: false
+      minProperties: 1
+
+      properties:
+        fullName:
+          type: string
+          minLength: 3
+          maxLength: 150
+
+        email:
+          type: string
+          format: email
+
+        phoneNumber:
+          type: string
+          minLength: 7
+          maxLength: 20
+
+    # ========================================
+    # EXECUTE REQUEST
+    # ========================================
+
+    ExecuteVerificationRequest:
+      type: object
+      additionalProperties: false
+
+      required:
+        - verificationType
+
+      properties:
+        verificationType:
+          type: string
+          enum:
+            - IDENTITY
+            - CONTACT
+            - PROFILE_COMPLETENESS
+
+        requestedBy:
+          type: string
+          maxLength: 100
+          description: Identificador del solicitante
+          example: BACKOFFICE-001
+
+    VerificationResult:
+      type: object
+      additionalProperties: false
+
+      required:
+        - customerProfileId
+        - verificationType
+        - result
+        - executedAt
+
+      properties:
+        customerProfileId:
+          type: string
+          format: uuid
+
+        verificationType:
+          type: string
+          enum:
+            - IDENTITY
+            - CONTACT
+            - PROFILE_COMPLETENESS
+
+        result:
+          $ref: "#/components/schemas/VerificationStatus"
+
+        executedAt:
+          type: string
+          format: date-time
+
+    # ========================================
+    # CONTROL REQUEST
+    # ========================================
+
+    ControlCustomerProfileRequest:
+      type: object
+      additionalProperties: false
+
+      required:
+        - controlAction
+        - reason
+
+      properties:
+        controlAction:
+          type: string
+          enum:
+            - SUSPEND
+            - REACTIVATE
+
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 300
+          example: Solicitud de revisión operativa
+
+    # ========================================
+    # BEHAVIOR QUALIFIER
+    # ========================================
+
+    ContactPreferences:
+      type: object
+      additionalProperties: false
+
+      properties:
+        preferredChannel:
+          type: string
+          enum:
+            - EMAIL
+            - SMS
+            - PHONE
+
+        preferredLanguage:
+          type: string
+          example: es-PE
+
+        marketingConsent:
+          type: boolean
+          example: false
+
+    # ========================================
+    # ERROR MODEL
+    # ========================================
+
+    ApiError:
+      type: object
+      required:
+        - code
+        - message
+
+      properties:
+        code:
+          type: string
+          example: CUSTOMER_PROFILE_NOT_FOUND
+
+        message:
+          type: string
+          example: El perfil solicitado no existe
+
+        timestamp:
+          type: string
+          format: date-time
+
+        path:
+          type: string
+
+  responses:
+    BadRequest:
+      description: Solicitud inválida
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    Unauthorized:
+      description: Token ausente o inválido
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    NotFound:
+      description: Perfil no encontrado
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+
+    Conflict:
+      description: Conflicto de estado o negocio
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
