@@ -30,6 +30,25 @@ Completar el programa no garantiza alcanzar un puesto Senior; ese nivel requiere
 
 ---
 
+### Referencia BIAN obligatoria para todos los proyectos
+
+Todos los proyectos utilizan **BIAN 14.0.0** como referencia de Service Domains. La versión de la API propia y la versión OpenAPI son independientes de la versión BIAN. Cada contrato debe declarar SD, Control Record, fuente oficial y adaptaciones; las extensiones educativas no se presentan como operaciones o Behavior Qualifiers oficiales.
+
+| Proyecto | Servicio o alcance | SD BIAN 14.0.0 |
+| --- | --- | --- |
+| 01 | Contrato inicial de clientes | Party Reference Data Directory |
+| 02 | Customer Service | Party Reference Data Directory |
+| 03 | Account Service | Current Account |
+| 04 | Banking Experience Service | Composición de Party Reference Data Directory y Current Account; sin SD propio equivalente. |
+| 05 | Notification Service | Correspondence (alineación parcial). |
+| 06 | Transfer Service | Payment Order Initiation; la Saga y la ejecución interna son decisiones de implementación. |
+| 07 | Audit Service | Customer Event History (historial funcional del cliente, alineación parcial). |
+| 08 | Statement Service | Document Services, con Current Account como fuente de movimientos. |
+
+Fuentes: [Service Landscape 14](https://bian.org/servicelandscape-14-0-0/) y [APIs oficiales BIAN 14.0.0](https://github.com/bian-official/public/tree/main/release14.0.0). En la carpeta semantic-apis de esta release, la ruta publicada de los YAML contiene `oas3%20/yamls/` (espacio codificado).
+
+La tabla define los servicios a construir en cada módulo y prevalece sobre los ejercicios genéricos del temario que todavía describen refactorizaciones o implementaciones comparativas. Las prácticas de arquitectura, pruebas y seguridad se acumulan; cada servicio se integra con los anteriores.
+
 # 2. Malla curricular
 
 ## Proyecto 01 — API First & Contract Design

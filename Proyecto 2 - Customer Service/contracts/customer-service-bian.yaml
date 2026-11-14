@@ -1,0 +1,609 @@
+openapi: "3.0.3"
+info:
+  title: Customer Service - Party Reference Data Directory
+  version: "1.0.0"
+  description: |
+    Contrato educativo del **Proyecto 2 - Customer Service**, alineado parcialmente
+    con **BIAN 14.0.0**.
+
+    **Service Domain:** Party Reference Data Directory.
+
+    **Control Record:** PartyReferenceDataDirectoryEntry.
+
+    Mantiene personas naturales y sus datos de referencia.
+
+    **Operaciones disponibles:**
+
+    - **Register:** registrar un cliente.
+    - **Retrieve:** consultar los datos de un cliente.
+    - **Update:** actualizar datos personales y de contacto.
+    - **Control:** activar o desactivar un cliente.
+
+    **Adaptaciones educativas:** utiliza DTOs propios simplificados y devuelve
+    **HTTP 201** al registrar un cliente.
+
+    Este contrato no es la especificación oficial ni declara certificación BIAN.
+x-bian:
+  serviceDomain: Party Reference Data Directory
+  controlRecord: PartyReferenceDataDirectoryEntry
+  referenceVersion: "14.0.0"
+  alignment: partial-educational
+  source: https://github.com/bian-official/public/blob/main/release14.0.0/semantic-apis/oas3%20/yamls/PartyReferenceDataDirectory.yaml
+servers:
+  - url: http://localhost:8080/banking/v1
+    description: Implementación local prevista para Proyecto 2
+tags:
+  - name: CR - PartyReferenceDataDirectoryEntry
+    description: Datos de referencia y ciclo de vida del registro del cliente.
+security:
+  - bearerAuth: []
+paths:
+  /PartyReferenceDataDirectory/Register:
+    post:
+      tags:
+        - CR - PartyReferenceDataDirectoryEntry
+      summary: Registrar un cliente
+      operationId: RegisterPartyReferenceDataDirectory
+      description: Crea una persona natural. La combinación documentType + documentNumber + issuingCountry es única, incluso para clientes inactivos. Un duplicado devuelve 409. No realiza KYC ni abre cuentas.
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+      responses:
+        "201":
+          description: Cliente registrado en estado ACTIVE.
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationId"
+            Location:
+              description: URI relativa de Retrieve para el cliente creado.
+              schema:
+                type: string
+                format: uri-reference
+              example: /banking/v1/PartyReferenceDataDirectory/f582dc46-f126-4f7d-933f-13abf78e4180/Retrieve
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartyReferenceDataDirectoryEntry"
+              example:
+                partyReferenceDataDirectoryId: f582dc46-f126-4f7d-933f-13abf78e4180
+                partyType: PERSON
+                identification:
+                  documentType: NATIONAL_ID
+                  documentNumber: "123456789"
+                  issuingCountry: CO
+                person:
+                  givenNames: Ana Maria
+                  familyNames: Lopez
+                  birthDate: "1995-04-12"
+                contact:
+                  email: ana@example.com
+                  phone: "+573001234567"
+                status: ACTIVE
+                createdAt: "2026-11-13T15:00:00Z"
+                updatedAt: "2026-11-13T15:00:00Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterPartyRequest"
+            example:
+              partyType: PERSON
+              identification:
+                documentType: NATIONAL_ID
+                documentNumber: "123456789"
+                issuingCountry: CO
+              person:
+                givenNames: Ana Maria
+                familyNames: Lopez
+                birthDate: "1995-04-12"
+              contact:
+                email: ana@example.com
+                phone: "+573001234567"
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Retrieve:
+    get:
+      tags:
+        - CR - PartyReferenceDataDirectoryEntry
+      summary: Consultar un cliente
+      operationId: RetrievePartyReferenceDataDirectory
+      description: Consulta por identificador interno, incluso si el cliente está inactivo. El acceso se limita a consumidores internos autorizados.
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+        - $ref: "#/components/parameters/PartyReferenceDataDirectoryId"
+      responses:
+        "200":
+          description: Entrada del cliente resultante.
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartyReferenceDataDirectoryEntry"
+              example:
+                partyReferenceDataDirectoryId: f582dc46-f126-4f7d-933f-13abf78e4180
+                partyType: PERSON
+                identification:
+                  documentType: NATIONAL_ID
+                  documentNumber: "123456789"
+                  issuingCountry: CO
+                person:
+                  givenNames: Ana Maria
+                  familyNames: Lopez
+                  birthDate: "1995-04-12"
+                contact:
+                  email: ana@example.com
+                  phone: "+573001234567"
+                status: ACTIVE
+                createdAt: "2026-11-13T15:00:00Z"
+                updatedAt: "2026-11-13T15:00:00Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Update:
+    put:
+      tags:
+        - CR - PartyReferenceDataDirectoryEntry
+      summary: Actualizar datos personales y de contacto
+      operationId: UpdatePartyReferenceDataDirectory
+      description: Reemplaza completamente person y contact. No permite modificar identificador, documento ni estado. Disponible para clientes activos e inactivos. En este módulo, actualizaciones concurrentes usan última escritura; ETag queda para una evolución posterior.
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+        - $ref: "#/components/parameters/PartyReferenceDataDirectoryId"
+      responses:
+        "200":
+          description: Entrada del cliente resultante.
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartyReferenceDataDirectoryEntry"
+              example:
+                partyReferenceDataDirectoryId: f582dc46-f126-4f7d-933f-13abf78e4180
+                partyType: PERSON
+                identification:
+                  documentType: NATIONAL_ID
+                  documentNumber: "123456789"
+                  issuingCountry: CO
+                person:
+                  givenNames: Ana Maria
+                  familyNames: Lopez
+                  birthDate: "1995-04-12"
+                contact:
+                  email: ana@example.com
+                  phone: "+573001234567"
+                status: ACTIVE
+                createdAt: "2026-11-13T15:00:00Z"
+                updatedAt: "2026-11-13T15:00:00Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdatePartyRequest"
+            example:
+              person:
+                givenNames: Ana Maria
+                familyNames: Lopez
+                birthDate: "1995-04-12"
+              contact:
+                email: ana@example.com
+                phone: "+573001234567"
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Control:
+    put:
+      tags:
+        - CR - PartyReferenceDataDirectoryEntry
+      summary: Activar o desactivar un cliente
+      operationId: ControlPartyReferenceDataDirectory
+      description: Permite ACTIVE a INACTIVE y viceversa. Solicitar el estado actual devuelve 200 sin modificar updatedAt. La desactivación es lógica y no elimina datos ni cierra cuentas; si existen obligaciones activas que impiden la transición, devuelve 409.
+      parameters:
+        - $ref: "#/components/parameters/CorrelationId"
+        - $ref: "#/components/parameters/PartyReferenceDataDirectoryId"
+      responses:
+        "200":
+          description: Entrada del cliente resultante.
+          headers:
+            X-Correlation-ID:
+              $ref: "#/components/headers/CorrelationId"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PartyReferenceDataDirectoryEntry"
+              example:
+                partyReferenceDataDirectoryId: f582dc46-f126-4f7d-933f-13abf78e4180
+                partyType: PERSON
+                identification:
+                  documentType: NATIONAL_ID
+                  documentNumber: "123456789"
+                  issuingCountry: CO
+                person:
+                  givenNames: Ana Maria
+                  familyNames: Lopez
+                  birthDate: "1995-04-12"
+                contact:
+                  email: ana@example.com
+                  phone: "+573001234567"
+                status: INACTIVE
+                createdAt: "2026-11-13T15:00:00Z"
+                updatedAt: "2026-11-13T16:00:00Z"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ControlPartyRequest"
+            example:
+              status: INACTIVE
+              reason: Solicitud del cliente
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Consumidores internos autorizados. Validar firma, issuer, audience y expiración; exigir customers:read para Retrieve y customers:write para Register/Update/Control. La configuración completa OAuth2/OIDC se desarrolla en Proyecto 4; no exponer datos reales mientras no esté implementada.
+  parameters:
+    PartyReferenceDataDirectoryId:
+      name: partyreferencedatadirectoryid
+      in: path
+      required: true
+      description: Identificador interno del cliente, no su documento.
+      schema:
+        type: string
+        format: uuid
+    CorrelationId:
+      name: X-Correlation-ID
+      in: header
+      required: false
+      description: UUID de trazabilidad. Si no se envía, el servicio lo genera; si es inválido, devuelve 400 y genera uno válido para la respuesta.
+      schema:
+        type: string
+        format: uuid
+  headers:
+    CorrelationId:
+      description: UUID recibido o generado por el servicio, presente en respuestas exitosas y de error.
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Identification:
+      type: object
+      additionalProperties: false
+      required:
+        - documentType
+        - documentNumber
+        - issuingCountry
+      properties:
+        documentType:
+          type: string
+          enum:
+            - NATIONAL_ID
+            - PASSPORT
+            - FOREIGN_ID
+        documentNumber:
+          type: string
+          minLength: 3
+          maxLength: 30
+          pattern: ^[A-Za-z0-9-]+$
+        issuingCountry:
+          type: string
+          pattern: ^[A-Z]{2}$
+          description: Código ISO 3166-1 alpha-2.
+    Person:
+      type: object
+      additionalProperties: false
+      required:
+        - givenNames
+        - familyNames
+        - birthDate
+      properties:
+        givenNames:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+        familyNames:
+          type: string
+          minLength: 1
+          maxLength: 100
+          pattern: .*\S.*
+        birthDate:
+          type: string
+          format: date
+          description: Debe ser una fecha pasada; validación de negocio en el servicio.
+    Contact:
+      type: object
+      additionalProperties: false
+      required:
+        - email
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        phone:
+          type: string
+          pattern: ^\+[1-9][0-9]{7,14}$
+          description: Número internacional en formato E.164.
+    RegisterPartyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - partyType
+        - identification
+        - person
+        - contact
+      properties:
+        partyType:
+          type: string
+          enum:
+            - PERSON
+        identification:
+          $ref: "#/components/schemas/Identification"
+        person:
+          $ref: "#/components/schemas/Person"
+        contact:
+          $ref: "#/components/schemas/Contact"
+    UpdatePartyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - person
+        - contact
+      properties:
+        person:
+          $ref: "#/components/schemas/Person"
+        contact:
+          $ref: "#/components/schemas/Contact"
+    ControlPartyRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - reason
+      properties:
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        reason:
+          type: string
+          minLength: 5
+          maxLength: 250
+          description: Motivo de la transición; conservar para auditoría, sin datos sensibles innecesarios.
+    PartyReferenceDataDirectoryEntry:
+      type: object
+      additionalProperties: false
+      required:
+        - partyReferenceDataDirectoryId
+        - partyType
+        - identification
+        - person
+        - contact
+        - status
+        - createdAt
+        - updatedAt
+      properties:
+        partyReferenceDataDirectoryId:
+          type: string
+          format: uuid
+        partyType:
+          type: string
+          enum:
+            - PERSON
+        identification:
+          $ref: "#/components/schemas/Identification"
+        person:
+          $ref: "#/components/schemas/Person"
+        contact:
+          $ref: "#/components/schemas/Contact"
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ValidationError:
+      type: object
+      additionalProperties: false
+      required:
+        - field
+        - message
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    Problem:
+      type: object
+      additionalProperties: false
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - instance
+        - code
+        - correlationId
+      properties:
+        type:
+          type: string
+          format: uri
+          example: urn:banking:problem:customer-not-found
+        title:
+          type: string
+        status:
+          type: integer
+          minimum: 400
+          maximum: 599
+        detail:
+          type: string
+          description: Mensaje seguro sin stack traces ni datos de identificación.
+        instance:
+          type: string
+          format: uri-reference
+        code:
+          type: string
+          example: CUSTOMER_NOT_FOUND
+        correlationId:
+          type: string
+          format: uuid
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/ValidationError"
+  responses:
+    BadRequest:
+      description: "Solicitud inválida: formato, campos o JSON incorrectos."
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:badrequest
+            title: BadRequest
+            status: 400
+            detail: "Solicitud inválida: formato, campos o JSON incorrectos."
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: BAD_REQUEST
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"
+    Unauthorized:
+      description: Token ausente, inválido o expirado.
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+        WWW-Authenticate:
+          schema:
+            type: string
+          description: Challenge Bearer.
+          example: Bearer
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:unauthorized
+            title: Unauthorized
+            status: 401
+            detail: Token ausente, inválido o expirado.
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: UNAUTHORIZED
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"
+    Forbidden:
+      description: El consumidor no tiene permiso para la operación.
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:forbidden
+            title: Forbidden
+            status: 403
+            detail: El consumidor no tiene permiso para la operación.
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: FORBIDDEN
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"
+    NotFound:
+      description: No existe el cliente solicitado.
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:notfound
+            title: NotFound
+            status: 404
+            detail: No existe el cliente solicitado.
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: NOT_FOUND
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"
+    Conflict:
+      description: Documento duplicado o transición de estado incompatible.
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:conflict
+            title: Conflict
+            status: 409
+            detail: Documento duplicado o transición de estado incompatible.
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: CONFLICT
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"
+    InternalServerError:
+      description: Error interno inesperado.
+      headers:
+        X-Correlation-ID:
+          $ref: "#/components/headers/CorrelationId"
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/Problem"
+          example:
+            type: urn:banking:problem:internalservererror
+            title: InternalServerError
+            status: 500
+            detail: Error interno inesperado.
+            instance: /banking/v1/PartyReferenceDataDirectory/Register
+            code: INTERNAL_SERVER_ERROR
+            correlationId: "5ef9348b-94a7-4e44-a3cd-a7eb57ebc329"

@@ -1,34 +1,41 @@
 openapi: 3.0.3
 
 info:
-  title: Banking Customer Profile API
+  title: Banking Party Reference Data Directory API
   description: |
     API bancaria educativa alineada conceptualmente
-    con BIAN (Banking Industry Architecture Network).
+    con BIAN 14.0.0 (Banking Industry Architecture Network).
 
-    Service Domain: Customer Profile
+    Service Domain: Party Reference Data Directory
 
-    Control Record: CustomerProfileRecord
+    Control Record: PartyReferenceDataDirectoryEntry
 
-    Behavior Qualifier: ContactPreferences
+    Extensión educativa propia: ContactPreferences (no es un BQ oficial del SD).
 
     Este contrato es didáctico y no representa
     una especificación oficial certificada por BIAN.
 
     Proyecto: Java Backend Engineering Academy.
-  version: 1.1.1
+  version: 2.0.0
   contact:
     name: Angelo Gomez
     email: gangelos630@gmail.com
+
+x-bian:
+  serviceDomain: Party Reference Data Directory
+  controlRecord: PartyReferenceDataDirectoryEntry
+  referenceVersion: '14.0.0'
+  alignment: partial-educational
+  source: 'https://github.com/bian-official/public/blob/main/release14.0.0/semantic-apis/oas3%20/yamls/PartyReferenceDataDirectory.yaml'
 
 servers:
   - url: /banking-v1
     description: Entorno local
 
 tags:
-  - name: CR - CustomerProfileRecord
+  - name: CR - PartyReferenceDataDirectoryEntry
     description: Gestión del ciclo de vida del perfil
-  - name: BQ - ContactPreferences
+  - name: Extension - ContactPreferences
     description: Preferencias de contacto del cliente
 
 paths:
@@ -36,15 +43,15 @@ paths:
   # OPERATION 01 - INITIATE
   # ==========================================
 
-  /CustomerProfile/Initiate:
+  /PartyReferenceDataDirectory/Register:
     post:
       tags:
-        - CR - CustomerProfileRecord
+        - CR - PartyReferenceDataDirectoryEntry
       summary: Iniciar un perfil bancario
       description: |
-        Initiate - Crea una instancia del
-        Control Record CustomerProfileRecord.
-      operationId: InitiateCustomerProfile
+        Register - Crea una instancia del
+        Control Record PartyReferenceDataDirectoryEntry.
+      operationId: RegisterPartyReferenceDataDirectory
       security:
         - bearerAuth: []
 
@@ -53,10 +60,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/InitiateCustomerProfileRequest"
+              $ref: '#/components/schemas/RegisterPartyReferenceDataDirectoryRequest'
 
       responses:
-        "201":
+        '201':
           description: Perfil iniciado correctamente
           headers:
             Location:
@@ -66,61 +73,61 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CustomerProfileRecord"
+                $ref: '#/components/schemas/PartyReferenceDataDirectoryEntry'
 
-        "400":
-          $ref: "#/components/responses/BadRequest"
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "409":
-          $ref: "#/components/responses/Conflict"
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   # ==========================================
   # OPERATION 02 - RETRIEVE
   # ==========================================
 
-  /CustomerProfile/{customerprofileid}/Retrieve:
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Retrieve:
     get:
       tags:
-        - CR - CustomerProfileRecord
+        - CR - PartyReferenceDataDirectoryEntry
       summary: Recuperar un perfil bancario
       description: |
         Retrieve - Consulta el estado y los
         datos de un Control Record existente.
-      operationId: RetrieveCustomerProfile
+      operationId: RetrievePartyReferenceDataDirectory
       security:
         - bearerAuth: []
 
       parameters:
-        - $ref: "#/components/parameters/CustomerProfileId"
+        - $ref: '#/components/parameters/PartyReferenceDataDirectoryId'
 
       responses:
-        "200":
+        '200':
           description: Perfil encontrado
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CustomerProfileRecord"
+                $ref: '#/components/schemas/PartyReferenceDataDirectoryEntry'
 
-        "400":
-          $ref: "#/components/responses/BadRequest"
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   # ==========================================
   # OPERATION 03 - UPDATE
   # ==========================================
 
-  /CustomerProfile/{customerprofileid}/Update:
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Update:
     put:
       tags:
-        - CR - CustomerProfileRecord
+        - CR - PartyReferenceDataDirectoryEntry
       summary: Actualizar un perfil bancario
       description: |
         Update - Modifica datos administrados
@@ -128,48 +135,48 @@ paths:
 
         En este ejercicio se permite actualizar
         nombre, correo y teléfono.
-      operationId: UpdateCustomerProfile
+      operationId: UpdatePartyReferenceDataDirectory
       security:
         - bearerAuth: []
 
       parameters:
-        - $ref: "#/components/parameters/CustomerProfileId"
+        - $ref: '#/components/parameters/PartyReferenceDataDirectoryId'
 
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateCustomerProfileRequest"
+              $ref: '#/components/schemas/UpdatePartyReferenceDataDirectoryRequest'
 
       responses:
-        "200":
+        '200':
           description: Perfil actualizado
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CustomerProfileRecord"
+                $ref: '#/components/schemas/PartyReferenceDataDirectoryEntry'
 
-        "400":
-          $ref: "#/components/responses/BadRequest"
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-        "409":
-          $ref: "#/components/responses/Conflict"
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   # ==========================================
   # OPERATION 04 - EXECUTE
   # ==========================================
 
-  /CustomerProfile/{customerprofileid}/Execute:
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Execute:
     post:
       tags:
-        - CR - CustomerProfileRecord
+        - CR - PartyReferenceDataDirectoryEntry
       summary: Ejecutar verificación del perfil
       description: |
         Execute - Solicita una verificación
@@ -177,48 +184,48 @@ paths:
 
         La verificación es simulada y no
         representa un proceso KYC real.
-      operationId: ExecuteCustomerProfileVerification
+      operationId: ExecutePartyReferenceDataDirectoryVerification
       security:
         - bearerAuth: []
 
       parameters:
-        - $ref: "#/components/parameters/CustomerProfileId"
+        - $ref: '#/components/parameters/PartyReferenceDataDirectoryId'
 
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ExecuteVerificationRequest"
+              $ref: '#/components/schemas/ExecuteVerificationRequest'
 
       responses:
-        "200":
+        '200':
           description: Verificación ejecutada
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/VerificationResult"
+                $ref: '#/components/schemas/VerificationResult'
 
-        "400":
-          $ref: "#/components/responses/BadRequest"
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-        "409":
-          $ref: "#/components/responses/Conflict"
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   # ==========================================
   # OPERATION 05 - CONTROL
   # ==========================================
 
-  /CustomerProfile/{customerprofileid}/Control:
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/Control:
     put:
       tags:
-        - CR - CustomerProfileRecord
+        - CR - PartyReferenceDataDirectoryEntry
       summary: Controlar el estado del perfil
       description: |
         Control - Solicita una transición
@@ -226,48 +233,48 @@ paths:
 
         Acciones educativas:
         SUSPEND y REACTIVATE.
-      operationId: ControlCustomerProfile
+      operationId: ControlPartyReferenceDataDirectory
       security:
         - bearerAuth: []
 
       parameters:
-        - $ref: "#/components/parameters/CustomerProfileId"
+        - $ref: '#/components/parameters/PartyReferenceDataDirectoryId'
 
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/ControlCustomerProfileRequest"
+              $ref: '#/components/schemas/ControlPartyReferenceDataDirectoryRequest'
 
       responses:
-        "200":
+        '200':
           description: Estado actualizado
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/CustomerProfileRecord"
+                $ref: '#/components/schemas/PartyReferenceDataDirectoryEntry'
 
-        "400":
-          $ref: "#/components/responses/BadRequest"
+        '400':
+          $ref: '#/components/responses/BadRequest'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
-        "409":
-          $ref: "#/components/responses/Conflict"
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   # ==========================================
   # BEHAVIOR QUALIFIER - CONTACT PREFERENCES
   # ==========================================
 
-  /CustomerProfile/{customerprofileid}/ContactPreferences/Retrieve:
+  /PartyReferenceDataDirectory/{partyreferencedatadirectoryid}/ContactPreferences/Retrieve:
     get:
       tags:
-        - BQ - ContactPreferences
+        - Extension - ContactPreferences
       summary: Consultar preferencias de contacto
       description: |
         Retrieve BQ - Recupera las preferencias
@@ -277,21 +284,21 @@ paths:
         - bearerAuth: []
 
       parameters:
-        - $ref: "#/components/parameters/CustomerProfileId"
+        - $ref: '#/components/parameters/PartyReferenceDataDirectoryId'
 
       responses:
-        "200":
+        '200':
           description: Preferencias encontradas
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ContactPreferences"
+                $ref: '#/components/schemas/ContactPreferences'
 
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 
-        "404":
-          $ref: "#/components/responses/NotFound"
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 # ==========================================
 # COMPONENTS
@@ -305,8 +312,8 @@ components:
       bearerFormat: JWT
 
   parameters:
-    CustomerProfileId:
-      name: customerprofileid
+    PartyReferenceDataDirectoryId:
+      name: partyreferencedatadirectoryid
       in: path
       required: true
       description: Identificador del Control Record
@@ -319,7 +326,7 @@ components:
     # CONTROL RECORD
     # ========================================
 
-    CustomerProfileRecord:
+    PartyReferenceDataDirectoryEntry:
       type: object
       additionalProperties: false
 
@@ -352,16 +359,16 @@ components:
 
         phoneNumber:
           type: string
-          example: "+51987654321"
+          example: '+51987654321'
 
         status:
-          $ref: "#/components/schemas/ProfileStatus"
+          $ref: '#/components/schemas/ProfileStatus'
 
         verificationStatus:
-          $ref: "#/components/schemas/VerificationStatus"
+          $ref: '#/components/schemas/VerificationStatus'
 
         contactPreferences:
-          $ref: "#/components/schemas/ContactPreferences"
+          $ref: '#/components/schemas/ContactPreferences'
 
     ProfileStatus:
       type: string
@@ -380,7 +387,7 @@ components:
     # INITIATE REQUEST
     # ========================================
 
-    InitiateCustomerProfileRequest:
+    RegisterPartyReferenceDataDirectoryRequest:
       type: object
       additionalProperties: false
 
@@ -408,13 +415,13 @@ components:
 
         phoneNumber:
           type: string
-          example: "+51987654321"
+          example: '+51987654321'
 
     # ========================================
     # UPDATE REQUEST
     # ========================================
 
-    UpdateCustomerProfileRequest:
+    UpdatePartyReferenceDataDirectoryRequest:
       type: object
       additionalProperties: false
       minProperties: 1
@@ -482,7 +489,7 @@ components:
             - PROFILE_COMPLETENESS
 
         result:
-          $ref: "#/components/schemas/VerificationStatus"
+          $ref: '#/components/schemas/VerificationStatus'
 
         executedAt:
           type: string
@@ -492,7 +499,7 @@ components:
     # CONTROL REQUEST
     # ========================================
 
-    ControlCustomerProfileRequest:
+    ControlPartyReferenceDataDirectoryRequest:
       type: object
       additionalProperties: false
 
@@ -569,25 +576,25 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiError"
+            $ref: '#/components/schemas/ApiError'
 
     Unauthorized:
       description: Token ausente o inválido
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiError"
+            $ref: '#/components/schemas/ApiError'
 
     NotFound:
       description: Perfil no encontrado
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiError"
+            $ref: '#/components/schemas/ApiError'
 
     Conflict:
       description: Conflicto de estado o negocio
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ApiError"
+            $ref: '#/components/schemas/ApiError'
